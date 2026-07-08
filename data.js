@@ -605,7 +605,7 @@ const items = [
   {name:"Baju Sobek",cat:"Pakaian",how:"Mulung",tip:"Barang mulung, tidak berguna untuk hadiah"},
   {name:"Bakso",cat:"Makanan",how:"Beli di gerobak bakso area 2 atau masak",tip:""},
   {name:"Bambu",cat:"Material",how:"Mancing di area 6 atau beli di Black Market",tip:"Digunakan untuk berbagai crafting"},
-  {name:"Bandana",cat:"Pakaian",how:"Beli di toko Pak Tatang (Selasa, Jumat)",tip:""},
+  {name:"Bandana",availDays:["Selasa", "Jumat"],cat:"Pakaian",how:"Beli di toko Pak Tatang (Selasa, Jumat)",tip:""},
   {name:"Batang Logam",cat:"Material",how:"Tungku Pelebur: Serpihan Logam + Briket Arang",tip:""},
   {name:"Batangan Emas",cat:"Berharga",how:"Mulung (langka)",tip:"Disukai SEMUA karakter sebagai hadiah +8"},
   {name:"Batu",cat:"Material",how:"Mancing di kolam area 4 atau mulung",tip:""},
@@ -626,7 +626,7 @@ const items = [
   {name:"Bola Api",cat:"Crafting Khusus",how:"Meja Produksi: Rotan x2 + Tumpukan Jerami + Thinner",tip:"Quest Asih"},
   {name:"Bola Karet",cat:"Material",how:"Meja Produksi: Karet Gelang x2 + Pelumas",tip:""},
   {name:"Bolu Pisang",cat:"Makanan",how:"Masak sendiri",tip:"Salah satu hadiah Milah +8"},
-  {name:"Boneka",cat:"Mainan",how:"Beli di toko Pak Tatang (Senin, Kamis)",tip:""},
+  {name:"Boneka",availDays:["Senin", "Kamis"],cat:"Mainan",how:"Beli di toko Pak Tatang (Senin, Kamis)",tip:""},
   {name:"Boneka Kain",cat:"Mainan",how:"Meja Produksi: Serpihan Serat + Kain + Benang Jahit",tip:""},
   {name:"Botol Beling",cat:"Material",how:"Mulung",tip:"Bahan Tungku Pelebur untuk Kaca"},
   {name:"Botol Saus",cat:"Material",how:"Mulung",tip:""},
@@ -648,7 +648,7 @@ const items = [
   {name:"Cheeseburger",cat:"Makanan",how:"Beli di Mr. Ronald area 5",tip:""},
   {name:"Cilok",cat:"Makanan",how:"Beli di Warung Ganormal area 4 atau gerobak area 2",tip:""},
   {name:"Cincin Nikah",cat:"Perhiasan",how:"Beli di toko Pak Tatang",tip:"Diperlukan untuk proses pernikahan"},
-  {name:"Coklat",cat:"Makanan",how:"Beli di toko Pak Tatang (Rabu, Sabtu)",tip:""},
+  {name:"Coklat",availDays:["Rabu", "Sabtu"],cat:"Makanan",how:"Beli di toko Pak Tatang (Rabu, Sabtu)",tip:""},
   {name:"Colokan",cat:"Elektronik",how:"Mulung",tip:""},
   // D
   {name:"Dinamo",cat:"Material",how:"Meja Produksi Lv.2: Kabel + Kawat + Gir Mesin + Plat Baja + Pelumas",tip:""},
@@ -698,7 +698,7 @@ const items = [
   {name:"Ikan Sidat",cat:"Ikan",how:"Mancing di sungai malam hari",tip:"Luck 2"},
   {name:"Ikan Tawes",cat:"Ikan",how:"Mancing di sungai",tip:"Luck 0 — sangat umum"},
   // J
-  {name:"Jam Tangan",cat:"Aksesoris",how:"Beli di toko Pak Tatang (Selasa)",tip:""},
+  {name:"Jam Tangan",availDays:["Selasa"],cat:"Aksesoris",how:"Beli di toko Pak Tatang (Selasa)",tip:""},
   {name:"Jam Tangan Kulit",cat:"Aksesoris",how:"Mulung",tip:""},
   {name:"Jam Weker",cat:"Perabotan",how:"Mulung",tip:""},
   {name:"Jantung Pisang",cat:"Bahan Masak",how:"Dari pohon pisang atau mulung",tip:"Bahan Oseng Jantung Pisang dan Kembang Tujuh Rupa"},
@@ -718,10 +718,10 @@ const items = [
   {name:"Kain Perca",cat:"Kerajinan",how:"Meja Produksi",tip:""},
   {name:"Kailan",cat:"Sayuran",how:"Tanam atau beli di Omegamart",tip:""},
   {name:"Kaleng Cat",cat:"Material",how:"Mulung",tip:""},
-  {name:"Kalung",cat:"Perhiasan",how:"Beli di toko Pak Tatang (Senin, Kamis)",tip:""},
-  {name:"Kalung Mutiara",cat:"Perhiasan",how:"Beli di toko Pak Tatang (Selasa, Jumat)",tip:"Disukai banyak karakter sebagai +8"},
+  {name:"Kalung",availDays:["Senin", "Kamis"],cat:"Perhiasan",how:"Beli di toko Pak Tatang (Senin, Kamis)",tip:""},
+  {name:"Kalung Mutiara",availDays:["Selasa", "Jumat"],cat:"Perhiasan",how:"Beli di toko Pak Tatang (Selasa, Jumat)",tip:"Disukai banyak karakter sebagai +8"},
   {name:"Kamus",cat:"Buku",how:"Beli di Gramedia area 5",tip:""},
-  {name:"Kaos Kaki",cat:"Pakaian",how:"Beli di toko Pak Tatang",tip:""},
+  {name:"Kaos Kaki",availDays:["Senin", "Kamis"],cat:"Pakaian",how:"Beli di toko Pak Tatang",tip:""},
   {name:"Karet Gelang",cat:"Material",how:"Mancing di danau area 6",tip:"Bahan Bola Karet"},
   {name:"Kartu Remi",cat:"Mainan",how:"Mulung",tip:""},
   {name:"Katapel",cat:"Mainan",how:"Meja Produksi",tip:""},
@@ -729,7 +729,7 @@ const items = [
   {name:"Kayu Gelondong",cat:"Material",how:"Mancing area 6 atau Black Market",tip:"Bahan berbagai crafting"},
   {name:"Kayu Kering",cat:"Material",how:"Meja Produksi: Ranting Daun",tip:""},
   {name:"Kayu Manis",cat:"Rempah",how:"Mancing harta karun Sungai Bojong Lima",tip:"Bahan Teh Herbal & Kemenyan"},
-  {name:"Kemeja",cat:"Pakaian",how:"Beli di toko Pak Tatang",tip:""},
+  {name:"Kemeja",availDays:["Rabu", "Sabtu"],cat:"Pakaian",how:"Beli di toko Pak Tatang",tip:""},
   {name:"Kemenyan",cat:"Crafting Khusus",how:"Tungku Pelebur: Briket Arang + Kayu Manis + Serpihan Serat + Getah Pohon",tip:"Hadiah Suciasih +8 & Joko +5"},
   {name:"Kembang Tujuh Rupa",cat:"Crafting Khusus",how:"Meja Produksi: Bunga x3 + Jantung Pisang",tip:"Quest Asih"},
   {name:"Keranjang",cat:"Perabotan",how:"Meja Produksi: Serpihan Serat + Ranting",tip:""},
@@ -739,7 +739,7 @@ const items = [
   {name:"Kipas Angin",cat:"Perabotan",how:"Mulung",tip:""},
   {name:"Komik",cat:"Buku",how:"Beli di Gramedia area 5",tip:""},
   {name:"Kopi",cat:"Minuman",how:"Beli di warung atau masak sendiri",tip:""},
-  {name:"Kosmetik",cat:"Kecantikan",how:"Beli di toko Pak Tatang",tip:""},
+  {name:"Kosmetik",availDays:["Senin", "Rabu", "Jumat"],cat:"Kecantikan",how:"Beli di toko Pak Tatang",tip:""},
   {name:"Kotak Musik",cat:"Perabotan",how:"Mulung",tip:""},
   {name:"Kristal Warna-warni",cat:"Material",how:"Mancing harta karun Sungai Bojong Lima",tip:"Bahan Batu Bulan & Gamelan"},
   {name:"Kuas",cat:"Alat Tulis",how:"Beli di toko alat tulis area 3",tip:"Juga bahan crafting Air Doa"},
@@ -758,17 +758,17 @@ const items = [
   {name:"Lele Crispy",cat:"Makanan",how:"Beli di FFC area 5",tip:""},
   {name:"Lele Goreng",cat:"Makanan",how:"Masak sendiri",tip:""},
   {name:"Lem",cat:"Material",how:"Beli di Toko Bangunan area 2",tip:""},
-  {name:"Liontin",cat:"Perhiasan",how:"Beli di toko Pak Tatang",tip:""},
-  {name:"Lipstik",cat:"Kecantikan",how:"Beli di toko Pak Tatang",tip:""},
+  {name:"Liontin",availDays:["Selasa", "Jumat"],cat:"Perhiasan",how:"Beli di toko Pak Tatang",tip:""},
+  {name:"Lipstik",availDays:["Senin", "Rabu", "Jumat"],cat:"Kecantikan",how:"Beli di toko Pak Tatang",tip:""},
   {name:"Lobster",cat:"Ikan",how:"Mancing di pantai",tip:"Luck 2"},
   {name:"Lobster Saus Padang",cat:"Makanan",how:"Beli di Joysteak area 4",tip:""},
   // M
   {name:"Mainan Anak",cat:"Mainan",how:"Mulung",tip:""},
   {name:"Mainan Kekinian",cat:"Mainan",how:"Beli di toko mainan atau Omegamart",tip:""},
   {name:"Mainan Tradisional",cat:"Mainan",how:"Meja Produksi",tip:""},
-  {name:"Majalah Wanita",cat:"Buku",how:"Beli di toko Pak Tatang",tip:""},
+  {name:"Majalah Wanita",availDays:["Selasa", "Kamis", "Sabtu"],cat:"Buku",how:"Beli di toko Pak Tatang",tip:""},
   {name:"Mangga",cat:"Buah",how:"Media Pembenihan atau beli di pasar",tip:""},
-  {name:"Masker",cat:"Kecantikan",how:"Beli di toko Pak Tatang atau Omegamart",tip:""},
+  {name:"Masker",availDays:["Senin", "Rabu", "Jumat"],cat:"Kecantikan",how:"Beli di toko Pak Tatang atau Omegamart",tip:""},
   {name:"Mie Ayam",cat:"Makanan",how:"Beli di Warung Mas Kumis area 2",tip:""},
   {name:"Mie Goreng",cat:"Makanan",how:"Masak sendiri",tip:""},
   {name:"Minuman Energi",cat:"Minuman",how:"Beli di Indomarket atau Omegamart",tip:""},
@@ -790,7 +790,7 @@ const items = [
   {name:"Paku",cat:"Material",how:"Mulung",tip:""},
   {name:"Pancingan",cat:"Peralatan",how:"Meja Produksi atau dari Pak Soleh",tip:""},
   {name:"Papan Kayu",cat:"Material",how:"Meja Produksi",tip:""},
-  {name:"Parfum",cat:"Kecantikan",how:"Beli di toko Pak Tatang",tip:""},
+  {name:"Parfum",availDays:["Senin", "Rabu", "Jumat"],cat:"Kecantikan",how:"Beli di toko Pak Tatang",tip:""},
   {name:"Parsel Hadiah",cat:"Hadiah",how:"Beli di Omegamart saat event atau toko tertentu",tip:"Disukai SEMUA karakter!"},
   {name:"Patung Kuno",cat:"Barang Kuno",how:"Mulung",tip:""},
   {name:"Pecahan Keramik",cat:"Material",how:"Mulung",tip:""},
@@ -829,7 +829,7 @@ const items = [
   {name:"Semangka",cat:"Buah",how:"Tanam atau beli di pasar",tip:""},
   {name:"Sendok",cat:"Perabotan",how:"Mulung",tip:""},
   {name:"Sendok Bengkok",cat:"Material",how:"Mulung",tip:""},
-  {name:"Sepatu",cat:"Pakaian",how:"Beli di toko Pak Tatang (Rabu, Sabtu)",tip:""},
+  {name:"Sepatu",availDays:["Rabu", "Sabtu"],cat:"Pakaian",how:"Beli di toko Pak Tatang (Rabu, Sabtu)",tip:""},
   {name:"Sepatu Kulit",cat:"Pakaian",how:"Mulung",tip:""},
   {name:"Sepatu Roda",cat:"Mainan",how:"Mulung",tip:""},
   {name:"Serpihan Logam",cat:"Material",how:"Mulung",tip:"Bahan Batang Logam"},
@@ -847,7 +847,7 @@ const items = [
   {name:"Tahu Bulat",cat:"Makanan",how:"Beli di Warung Ganormal area 4",tip:""},
   {name:"Tali Tambang",cat:"Material",how:"Meja Produksi",tip:""},
   {name:"Tanah Liat",cat:"Material",how:"Mulung",tip:""},
-  {name:"Tas Tangan",cat:"Aksesoris",how:"Beli di toko Pak Tatang",tip:""},
+  {name:"Tas Tangan",availDays:["Selasa", "Kamis"],cat:"Aksesoris",how:"Beli di toko Pak Tatang",tip:""},
   {name:"Teh Botol",cat:"Minuman",how:"Beli di Indomarket atau Omegamart",tip:""},
   {name:"Teh Herbal",cat:"Minuman",how:"Meja Produksi: Ranting + Kayu Manis + Eceng Gondok + Rumput Kering",tip:"Beberapa karakter menyukainya"},
   {name:"Teko",cat:"Perabotan",how:"Mulung",tip:""},
@@ -858,7 +858,7 @@ const items = [
   {name:"Thinner",cat:"Material",how:"Meja Produksi",tip:"Bahan Bola Api & Karet Olahan"},
   {name:"Tiket Lotre",cat:"Lainnya",how:"Beli di Omegamart",tip:""},
   {name:"Tomat",cat:"Sayuran",how:"Tanam atau beli di Omegamart",tip:""},
-  {name:"Topi",cat:"Pakaian",how:"Beli di toko Pak Tatang (Selasa)",tip:""},
+  {name:"Topi",availDays:["Selasa"],cat:"Pakaian",how:"Beli di toko Pak Tatang (Selasa)",tip:""},
   {name:"Topi Jerami",cat:"Pakaian",how:"Mulung",tip:""},
   {name:"Toples Kaca",cat:"Perabotan",how:"Mulung atau Tungku Pelebur",tip:""},
   {name:"Tube Lem",cat:"Material",how:"Meja Produksi: Getah Pohon + Air",tip:""},
@@ -998,3 +998,15 @@ const rCls   = {8:"rp8",5:"rp5",3:"rp3",1:"rp1"};
 const rLbl   = {8:"⭐+8",5:"💚+5",3:"💜+3",1:"🩶+1"};
 const lkLbl  = ["Luck 0","Luck 1","Luck 2","Luck 3","Luck 4"];
 const stations = ["Semua","Meja Produksi Lv.1","Meja Produksi Lv.2","Tungku Pelebur","Crafting Khusus (Quest)"];
+
+/* ── Item availability helper ── */
+const everyDay = ["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"];
+function itemAvailDays(name) {
+  const it = items.find(i => i.name === name);
+  if (!it) return everyDay;
+  if (it.availDays) return it.availDays;
+  return everyDay; // mulung/omegamart/mancing = every day
+}
+function isItemAvailOn(name, day) {
+  return itemAvailDays(name).includes(day);
+}

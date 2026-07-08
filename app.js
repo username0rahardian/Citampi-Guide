@@ -25,6 +25,36 @@ const S = {
 
 const MAX_PIN = 10, MAX_PRIO = 3;
 
+/* ── Real-time day/time detection (must be before state init) ── */
+const dayNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+
+function getRealDay() {
+  return dayNames[new Date().getDay()];
+}
+function getRealTime() {
+  const h = new Date().getHours();
+  if (h >= 6  && h < 12) return 'Pagi';
+  if (h >= 12 && h < 15) return 'Siang';
+  if (h >= 15 && h < 18) return 'Sore';
+  return 'Malam';
+}
+function getRealClock() {
+  const now = new Date();
+  return String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+}
+function applyRealTime() {
+  if (!S.locRealTime) return;
+  S.day  = getRealDay();
+  S.time = getRealTime();
+}
+
+/* ── Auto-refresh every 60s ── */
+setInterval(() => {
+  if (S.locRealTime && S.feature === 'karakter' && S.subTab === 'lokasi' && S.selected) {
+    applyRealTime(); renderInfo();
+  }
+}, 60000);
+
 /* load persisted state */
 try {
   S.pins  = JSON.parse(localStorage.getItem('cs7_pins')  || '[]');
@@ -61,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initMainNav();
   renderAll();
+  renderBagWidget();
 });
 
 /* ════════════════════════════════════════
@@ -84,6 +115,7 @@ function initMainNav() {
       if (f === 'item')      S.subTab = 'cara-dapat';
       if (f === 'job')       S.subTab = 'deskripsi';
       if (f === 'prioritas') S.subTab = 'prio-view';
+      if (f === 'planning')  { S.planDay = S.planDay || getRealDay(); }
       document.querySelectorAll('.mnav').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.btab').forEach(b =>
         b.classList.toggle('active', b.dataset.f === f));
@@ -101,6 +133,7 @@ function initMainNav() {
 }
 
 function renderAll() {
+  document.body.classList.toggle('planning-mode', S.feature === 'planning');
   renderSubNav();
   renderFilters();
   renderQuickFilters();
@@ -109,6 +142,7 @@ function renderAll() {
   renderHeaderPrio();
   updatePinBadge();
   updateMobileView();
+  renderBagWidget();
 }
 
 /* ════════════════════════════════════════
@@ -248,6 +282,11 @@ function renderSubNav() {
     sn.appendChild(b);
   }
 
+  if (S.feature === 'planning') {
+    renderPlanningSubNav();
+    return;
+  }
+
   if (S.feature === 'prioritas') {
     const b = el('button', `snav active`, `<span class="snav-icon">📌</span><span class="snav-lbl">Daftar Pin</span>`);
     sn.appendChild(b);
@@ -313,6 +352,14 @@ function clearQuickFilter() {
 }
 
 function renderFilters() {
+  if (S.feature === 'planning') {
+    const fc = $('filter-chips');
+    const sr = $('sort-select');
+    if (fc) fc.innerHTML = '';
+    if (sr) sr.innerHTML = '<option value="">— Planning —</option>';
+    return;
+  }
+
   const fc = $('filter-chips');
   const sr = $('sort-select');
   fc.innerHTML = '';
@@ -363,6 +410,12 @@ function renderList() {
   const g = $('list-grid');
   g.innerHTML = '';
 
+  if (S.feature === 'planning') {
+    // planning tidak butuh list grid
+    g.innerHTML = `<div style="padding:16px 8px;text-align:center;color:var(--dim);font-size:10px;font-weight:700">Atur preset di panel kanan →</div>`;
+    return;
+  }
+
   const qf = S.quickFilter ? quickFilters[S.feature]?.find(f => f.id === S.quickFilter) : null;
 
   if (S.feature === 'karakter') {
@@ -409,7 +462,7 @@ function renderList() {
     if (!data.length) { g.innerHTML = '<div class="no-data">Tidak ditemukan 🔍</div>'; return; }
     data.forEach(i => {
       const b = el('button', `list-btn${S.selected===i.name?' selected':''}`,
-        `<span class="lb-emoji">🎁</span><span class="lb-name">${i.name}</span>`);
+        `<span class="lb-emoji">${catIcon(i.cat)}</span><span class="lb-name">${i.name}</span>`);
       b.addEventListener('click', () => {
         S.selected = i.name;
         if (isMobile()) { S.mobView = 'info'; updateMobileView(); closeDrawer(); }
@@ -768,6 +821,11 @@ function renderInfoTabs() {
     it.appendChild(b);
   }
 
+  if (S.feature === 'planning') {
+    const b = el('button','itab active',`📅 Preset ${S.planDay}`);
+    it.appendChild(b);
+  }
+
   if (S.feature === 'prioritas') {
     const b = el('button','itab active','📌 Pin & Prioritas');
     it.appendChild(b);
@@ -777,6 +835,12 @@ function renderInfoTabs() {
 function renderInfoContent() {
   const ic = $('info-content');
   ic.innerHTML = '';
+
+  /* ─── PLANNING ─── */
+  if (S.feature === 'planning') {
+    renderPlanningContent();
+    return;
+  }
 
   /* ─── EMPTY STATE → QUICK START GUIDE ─── */
   if (!S.selected && S.feature !== 'prioritas') {
@@ -906,17 +970,14 @@ function renderInfoContent() {
 
     /* Info Dasar */
     if (S.subTab === 'info-dasar') {
-      const rows = [
-        ['📅 Ulang Tahun', c.birthdate],
-        ['🎭 Hobi',        c.hobi],
-        ['✨ Sifat',        c.personality],
-        ['💍 Bisa Dinikahi', c.canMarry ? 'Ya' : 'Tidak'],
-      ];
-      rows.forEach(([lbl,val]) => {
-        const r = el('div','info-row');
-        r.innerHTML = `<div class="info-lbl">${lbl}</div><div class="info-val">${val || 'Tidak diketahui'}</div>`;
-        ic.appendChild(r);
-      });
+      ic.appendChild(infoRowIcon('📅','Ulang Tahun', c.birthdate));
+      ic.appendChild(infoRowIcon('🎭','Hobi', c.hobi));
+      ic.appendChild(infoRowIcon('✨','Sifat / Kepribadian', c.personality));
+      ic.appendChild(infoRowIcon(
+        c.canMarry ? '💍' : '🚫',
+        'Bisa Dinikahi',
+        c.canMarry ? 'Ya' : 'Tidak'
+      ));
       if (c.desc) ic.appendChild(el('div','info-fact', c.desc));
     }
   }
@@ -985,10 +1046,15 @@ function renderInfoContent() {
 
     /* Cara Mendapatkan */
     if (S.subTab === 'cara-dapat') {
-      const box = el('div','item-how');
-      box.innerHTML = `<div class="item-how-lbl">📍 Cara Mendapatkan</div>${info.how}`;
-      ic.appendChild(box);
-      if (info.tip) ic.appendChild(el('div','info-fact','💡 ' + info.tip));
+      const how = el('div','how-row');
+      how.innerHTML = `
+        <div class="how-icon">${catIcon(info.cat)}</div>
+        <div class="how-body">
+          <div class="how-lbl">Cara Mendapatkan</div>
+          <div class="how-val">${info.how}</div>
+          ${info.tip ? `<div class="how-tip">💡 ${info.tip}</div>` : ''}
+        </div>`;
+      ic.appendChild(how);
 
       // recipe if craftable
       const rec = recipes.find(r => r.result === S.selected || r.result.startsWith(S.selected));
@@ -1073,23 +1139,60 @@ function renderInfoContent() {
       </div>`;
     ic.appendChild(diffWrap);
 
+    // stat cards row: gaji + jam + area
+    const statRow = el('div','stat-row');
+    statRow.innerHTML = `
+      <div class="stat-card salary">
+        <div class="stat-icon">💰</div>
+        <div><div class="stat-lbl">Gaji</div><div class="stat-val">${j.salary} Rc/jam</div></div>
+      </div>
+      <div class="stat-card hours">
+        <div class="stat-icon">⏰</div>
+        <div><div class="stat-lbl">Jam Kerja</div><div class="stat-val">${j.hours}</div></div>
+      </div>
+      <div class="stat-card area">
+        <div class="stat-icon">🗺️</div>
+        <div><div class="stat-lbl">Area</div><div class="stat-val">Area ${j.area}</div></div>
+      </div>`;
+    ic.appendChild(statRow);
+
+    // skill icon pills
+    const skillWrap = el('div','');
+    skillWrap.innerHTML = `<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:7px">💡 Skill Minimum</div>`;
+    const skillRow = el('div','skill-icon-row');
+    skillRow.innerHTML = `
+      <div class="skill-icon-pill sip-k">
+        <span class="sip-icon">💬</span>
+        <div class="sip-body">
+          <div class="sip-name">Komunikasi</div>
+          <div class="sip-val">${j.skill.k}</div>
+        </div>
+      </div>
+      <div class="skill-icon-pill sip-f">
+        <span class="sip-icon">💪</span>
+        <div class="sip-body">
+          <div class="sip-name">Fisik</div>
+          <div class="sip-val">${j.skill.f}</div>
+        </div>
+      </div>
+      <div class="skill-icon-pill sip-c">
+        <span class="sip-icon">🧠</span>
+        <div class="sip-body">
+          <div class="sip-name">Kecerdasan</div>
+          <div class="sip-val">${j.skill.c}</div>
+        </div>
+      </div>`;
+    skillWrap.appendChild(skillRow);
+    ic.appendChild(skillWrap);
+
+    // costume & exp
     const rows = el('div','job-rows');
+    rows.style.marginTop = '10px';
     const addRow = (lbl, val) => {
       const r = el('div','jrow');
       r.innerHTML = `<div class="jlbl">${lbl}</div><div class="jval">${val}</div>`;
       rows.appendChild(r);
     };
-    addRow('⏰ Jam Kerja', j.hours);
-    addRow('🌍 Area', `Area ${j.area}`);
-
-    const skillRow = el('div','jrow');
-    skillRow.innerHTML = `<div class="jlbl">💡 Skill Min</div>
-      <div class="skill-pills">
-        <span class="skp skp-k">Komunikasi ${j.skill.k}</span>
-        <span class="skp skp-f">Fisik ${j.skill.f}</span>
-        <span class="skp skp-c">Cerdas ${j.skill.c}</span>
-      </div>`;
-    rows.appendChild(skillRow);
 
     if (j.costume && j.costume !== '—') {
       const cr = el('div','jrow');
@@ -1099,7 +1202,7 @@ function renderInfoContent() {
     if (j.exp && j.exp !== '—') {
       addRow('📋 Pengalaman', `<span class="exp-txt">${j.exp}</span>`);
     }
-    ic.appendChild(rows);
+    if (rows.children.length) ic.appendChild(rows);
   }
 
   /* ─── PRIORITAS ─── */
@@ -1354,6 +1457,36 @@ const quickFilters = {
   ],
 };
 
+/* ── Category icon map ── */
+const catIcons = {
+  'Ikan':'🐟','Ikan Quest':'🐟',
+  'Berharga':'⭐','Barang Kuno':'🏺',
+  'Perhiasan':'💍','Buku':'📚',
+  'Pakaian':'👗','Aksesoris':'👜',
+  'Perabotan':'🏠','Kerajinan':'✂️',
+  'Kecantikan':'💄','Elektronik':'📱',
+  'Sayuran':'🥬','Buah':'🍎',
+  'Material':'⚙️','Minuman':'🥤',
+  'Makanan':'🍳','Makanan Khusus':'🎊',
+  'Mainan':'🎮','Item Quest':'⚔️',
+  'Crafting Khusus':'🔮','Benih':'🌱',
+  'Tanaman':'🌿','Bahan Masak':'🌶️',
+  'Rempah':'🌿','Kain Tradisional':'🧣',
+  'Hewan':'🐾','Lainnya':'📦',
+};
+function catIcon(cat) { return catIcons[cat] || '📦'; }
+
+/* ── Info row with icon ── */
+function infoRowIcon(icon, lbl, val) {
+  const d = el('div','info-row-icon');
+  d.innerHTML = `<div class="iri-icon">${icon}</div>
+    <div class="iri-body">
+      <div class="iri-lbl">${lbl}</div>
+      <div class="iri-val">${val || 'Tidak diketahui'}</div>
+    </div>`;
+  return d;
+}
+
 function getJobDiff(j) {
   const max = Math.max(j.skill.k, j.skill.f, j.skill.c);
   if (max <= 2) return { cls:'diff-easy', lbl:'Pemula',   segs:1 };
@@ -1363,41 +1496,6 @@ function getJobDiff(j) {
 
 
 
-/* ── Real-time day/time detection ── */
-const dayNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-
-function getRealDay() {
-  return dayNames[new Date().getDay()];
-}
-
-function getRealTime() {
-  const h = new Date().getHours();
-  if (h >= 6  && h < 12) return 'Pagi';
-  if (h >= 12 && h < 15) return 'Siang';
-  if (h >= 15 && h < 18) return 'Sore';
-  return 'Malam';
-}
-
-function getRealClock() {
-  const now = new Date();
-  const hh  = String(now.getHours()).padStart(2,'0');
-  const mm  = String(now.getMinutes()).padStart(2,'0');
-  return `${hh}:${mm}`;
-}
-
-function applyRealTime() {
-  if (!S.locRealTime) return;
-  S.day  = getRealDay();
-  S.time = getRealTime();
-}
-
-/* ── Auto-refresh every 60s if real-time mode active ── */
-setInterval(() => {
-  if (S.locRealTime && S.feature === 'karakter' && S.subTab === 'lokasi' && S.selected) {
-    applyRealTime();
-    renderInfo();
-  }
-}, 60000);
 
 /* ════════════════════════════════════════
    MOBILE SYSTEM
@@ -1453,6 +1551,7 @@ function switchFeatureMob(f, btn) {
   if (f === 'item')      S.subTab = 'cara-dapat';
   if (f === 'job')       S.subTab = 'deskripsi';
   if (f === 'prioritas') S.subTab = 'prio-view';
+  if (f === 'planning')  { S.planDay = S.planDay || getRealDay(); }
 
   // sync desktop nav
   document.querySelectorAll('.mnav').forEach(b =>
@@ -1500,6 +1599,370 @@ window.addEventListener('resize', () => {
     updateMobileView();
   }
 });
+
+/* ════════════════════════════════════════
+   PLANNING SYSTEM
+════════════════════════════════════════ */
+
+/* ── Planning State ── */
+S.planDay       = getRealDay();   // hari yang sedang diedit
+S.planSelChar   = null;           // char yang sedang dipilih di editor
+S.planCraftItem = null;           // item craft yang dipilih
+S.planCraftOpen = {};             // expanded nodes di crafting tree
+
+/* ── Presets: { Senin: { items:{name:bool}, craft:name|null, craftConfirm:{name:bool} } } ── */
+let presets = {};
+try {
+  presets = JSON.parse(localStorage.getItem('cs13_presets') || '{}');
+} catch(e) { presets = {}; }
+
+function savePresets() {
+  try { localStorage.setItem('cs13_presets', JSON.stringify(presets)); } catch(e) {}
+  renderBagWidget();
+}
+
+function getPreset(day) {
+  if (!presets[day]) presets[day] = { items:{}, craft:null, craftConfirm:{} };
+  return presets[day];
+}
+
+/* ── Bag widget (nav) ── */
+function renderBagWidget() {
+  const today   = getRealDay();
+  const preset  = getPreset(today);
+  const checked = Object.entries(preset.items).filter(([,v]) => v).map(([k]) => k);
+  const count   = checked.length;
+  const btn     = $('nav-bag-btn');
+  const badge   = $('bag-count');
+  const lbl     = $('bag-lbl');
+  const prev    = $('bag-preview');
+  if (!btn) return;
+  btn.classList.toggle('has-items', count > 0);
+  if (badge) { badge.textContent = count; badge.style.display = count ? 'flex' : 'none'; }
+  if (lbl)   lbl.textContent = count ? `${count} item` : 'Bawaan';
+  if (prev) {
+    prev.innerHTML = checked.slice(0,6).map(() =>
+      `<div class="bag-dot"></div>`).join('');
+  }
+}
+
+function switchFeatureFromBag() {
+  // go to planning tab, day = today
+  S.feature  = 'planning';
+  S.planDay  = getRealDay();
+  document.querySelectorAll('.mnav').forEach(b =>
+    b.classList.toggle('active', b.dataset.f === 'planning'));
+  renderAll();
+}
+
+/* ── Sub-nav for Planning ── */
+function renderPlanningSubNav() {
+  const sn = $('sub-nav');
+  sn.innerHTML = '';
+
+  const lbl = el('div','snav-group-lbl','Pilih Hari');
+  sn.appendChild(lbl);
+
+  days.forEach(d => {
+    const preset  = getPreset(d);
+    const hasItems = Object.values(preset.items).some(v => v) || preset.craft;
+    const isToday  = d === getRealDay();
+    const wrap     = el('div','',`
+      <button class="snav${S.planDay===d?' active':''}${hasItems?' snav-has-preset':''}"
+        style="width:100%;display:flex;align-items:center;gap:7px;text-align:left;position:relative"
+        onclick="setPlanDay('${d}')">
+        <span class="snav-icon">📅</span>
+        <span class="snav-lbl">${d}${isToday?' ⬅':''}</span>
+        ${hasItems?`<span style="width:6px;height:6px;border-radius:50%;background:var(--mint);margin-left:auto;flex-shrink:0"></span>`:''}
+      </button>`);
+    sn.appendChild(wrap);
+  });
+
+  const sep = el('div','snav-sep'); sn.appendChild(sep);
+
+  // clear day button
+  const clr = el('button','snav','🗑️ Kosongkan Hari Ini');
+  clr.style.color = 'var(--rose)';
+  clr.style.fontSize = '10px';
+  clr.addEventListener('click', () => {
+    if (!confirm(`Kosongkan preset ${S.planDay}?`)) return;
+    presets[S.planDay] = { items:{}, craft:null, craftConfirm:{} };
+    savePresets();
+    S.planSelChar = null;
+    S.planCraftItem = null;
+    renderAll();
+  });
+  sn.appendChild(clr);
+}
+
+function setPlanDay(d) {
+  S.planDay     = d;
+  S.planSelChar = null;
+  renderPlanningSubNav();
+  renderPlanningContent();
+}
+
+/* ── Main Planning render ── */
+function renderPlanningContent() {
+  const ic = $('info-content');
+  ic.innerHTML = '';
+
+  const day    = S.planDay;
+  const preset = getPreset(day);
+  const isToday = day === getRealDay();
+
+  const wrap = el('div','plan-wrap');
+
+  // ── HEADER
+  const hdr = el('div','');
+  hdr.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <div style="font-size:28px">📅</div>
+      <div>
+        <div style="font-size:17px;font-weight:900;color:var(--txt)">
+          Preset ${day}
+          ${isToday?`<span style="font-size:10px;background:var(--mint);color:#fff;padding:2px 7px;border-radius:5px;margin-left:6px;font-weight:800">HARI INI</span>`:''}
+        </div>
+        <div style="font-size:11px;color:var(--muted)">
+          Atur item bawaan untuk hari ${day}
+        </div>
+      </div>
+    </div>`;
+  wrap.appendChild(hdr);
+
+  // ── SECTION 1: PILIH KARAKTER
+  wrap.appendChild(el('div','plan-section-lbl','👥 Pilih Karakter Target'));
+
+  if (!S.pins.length) {
+    wrap.appendChild(el('div','plan-empty',`
+      <div class="plan-empty-icon">📍</div>
+      <div class="plan-empty-title">Belum ada karakter di-pin</div>
+      <div class="plan-empty-sub">Pin karakter dari tab Karakter dulu, lalu kembali ke sini untuk mengatur bawaan harian.</div>`));
+    ic.appendChild(wrap);
+    return;
+  }
+
+  const charRow = el('div','plan-char-row');
+  S.pins.forEach(name => {
+    const c = chars.find(ch => ch.name === name);
+    if (!c) return;
+    const chip = el('button', `plan-char-chip${S.planSelChar===name?' selected':''}`,
+      `<span class="pcc-emoji">${c.emoji}</span><span>${name}</span>`);
+    chip.addEventListener('click', () => {
+      S.planSelChar = S.planSelChar === name ? null : name;
+      renderPlanningContent();
+    });
+    charRow.appendChild(chip);
+  });
+  wrap.appendChild(charRow);
+
+  // ── SECTION 2: ITEM REKOMENDASI (jika char dipilih)
+  if (S.planSelChar) {
+    const c = chars.find(ch => ch.name === S.planSelChar);
+    if (c) {
+      wrap.appendChild(el('div','plan-section-lbl',
+        `🎁 Item Favorit ${c.emoji} ${c.name} — ${day}`));
+
+      // collect all gifts tier 8 & 5
+      const allGifts = [
+        ...tOrd.filter(p => p >= 5).flatMap(p =>
+          (c.gifts[p]||[]).map(name => ({ name, tier:p }))
+        )
+      ];
+
+      if (!allGifts.length) {
+        wrap.appendChild(el('div','info-fact','Tidak ada data hadiah untuk karakter ini.'));
+      } else {
+        const grid = el('div','plan-item-grid');
+        allGifts.forEach(({ name, tier }) => {
+          const avail   = isItemAvailOn(name, day);
+          const checked = preset.items[name] === true;
+          const info    = getItemInfo(name);
+
+          const card = el('div',
+            `plan-item-card${checked?' checked':''}${!avail?' unavail':''}`);
+          card.innerHTML = `
+            <div class="pic-check">${checked?'✓':''}</div>
+            <div class="pic-icon">${catIcon(info.cat)}</div>
+            <div class="pic-name">${name}</div>
+            <div class="pic-tier" style="color:var(--${tier===8?'t8':'t5'})">${tier===8?'⭐ +8':'💚 +5'}</div>
+            ${!avail ? `<div class="pic-unavail-tag">⚠️ Cek ketersediaan</div>` : ''}`;
+
+          card.addEventListener('click', (e) => {
+            if (!avail) { showUnavailPopup(name, day, e); return; }
+            preset.items[name] = !preset.items[name];
+            savePresets();
+            renderPlanningContent();
+          });
+          card.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            showUnavailPopup(name, day, e);
+          });
+          grid.appendChild(card);
+        });
+        wrap.appendChild(grid);
+      }
+    }
+  }
+
+  // ── SECTION 3: ITEM YANG SUDAH DIPILIH (summary)
+  const checkedItems = Object.entries(preset.items).filter(([,v]) => v).map(([k]) => k);
+  if (checkedItems.length) {
+    wrap.appendChild(el('div','plan-section-lbl',`✅ Daftar Bawaan (${checkedItems.length} item)`));
+    const bagGrid = el('div','plan-item-grid');
+    checkedItems.forEach(name => {
+      const info    = getItemInfo(name);
+      const avail   = isItemAvailOn(name, day);
+      const card = el('div',`plan-item-card checked${!avail?' unavail':''}`);
+      card.innerHTML = `
+        <div class="pic-check">✓</div>
+        <div class="pic-icon">${catIcon(info.cat)}</div>
+        <div class="pic-name">${name}</div>
+        ${!avail?`<div class="pic-unavail-tag">⚠️ Tidak tersedia ${day}</div>`:''}`;
+      card.addEventListener('click', () => {
+        preset.items[name] = false;
+        savePresets();
+        renderPlanningContent();
+      });
+      bagGrid.appendChild(card);
+    });
+    wrap.appendChild(bagGrid);
+  }
+
+  // ── SECTION 4: CRAFTING
+  wrap.appendChild(el('div','plan-section-lbl','🔨 Target Crafting (opsional)'));
+
+  const ctWrap = el('div','craft-tree');
+
+  // craft picker
+  const picker = el('div','ct-picker');
+  const noneBtn = el('button',`ct-pick${!preset.craft?' active':''}`, '— Tidak ada —');
+  noneBtn.addEventListener('click', () => {
+    preset.craft = null; preset.craftConfirm = {};
+    savePresets(); S.planCraftItem = null;
+    renderPlanningContent();
+  });
+  picker.appendChild(noneBtn);
+
+  // show craftable items from recipes
+  const craftableNames = [...new Set(recipes.map(r => r.result))];
+  craftableNames.forEach(name => {
+    const b = el('button',`ct-pick${preset.craft===name?' active':''}`, name);
+    b.addEventListener('click', () => {
+      preset.craft = name;
+      preset.craftConfirm = {};
+      savePresets();
+      S.planCraftItem = name;
+      renderPlanningContent();
+    });
+    picker.appendChild(b);
+  });
+  ctWrap.appendChild(picker);
+
+  // render crafting tree if selected
+  if (preset.craft) {
+    const treeEl = renderCraftTree(preset.craft, preset, 0);
+    ctWrap.appendChild(treeEl);
+  }
+
+  wrap.appendChild(ctWrap);
+  ic.appendChild(wrap);
+
+  // ── SUMMARY BAR
+  const total     = checkedItems.length + (preset.craft ? 1 : 0);
+  const needBuy   = checkedItems.filter(n => {
+    const info = getItemInfo(n);
+    return info.how.toLowerCase().includes('beli');
+  }).length;
+  const needFind  = checkedItems.length - needBuy;
+
+  const sumBar = el('div','plan-summary');
+  sumBar.innerHTML = `
+    <div class="ps-stat">🎒 ${checkedItems.length} dibawa</div>
+    ${needBuy  ? `<div class="ps-stat">🛒 ${needBuy} beli</div>` : ''}
+    ${needFind ? `<div class="ps-stat">🔍 ${needFind} cari</div>` : ''}
+    ${preset.craft ? `<div class="ps-stat">🔨 craft: ${preset.craft}</div>` : ''}
+    <span class="ps-saved">✅ Auto-tersimpan</span>`;
+  ic.appendChild(sumBar);
+}
+
+/* ── Crafting Tree (recursive) ── */
+function renderCraftTree(itemName, preset, depth) {
+  const wrapper  = el('div', depth > 0 ? 'ct-children' : 'ct-node');
+  const recipe   = recipes.find(r => r.result === itemName);
+  const confirmed = preset.craftConfirm?.[itemName] || false;
+  const hasChildren = !!recipe;
+  const expandKey   = `${depth}_${itemName}`;
+  const isExpanded  = S.planCraftOpen[expandKey] !== false; // default expand
+
+  const item = el('div',
+    `ct-item${depth===0?' ct-root':''}${confirmed?' ct-confirmed':''}${hasChildren?' ct-has-children':''}${hasChildren&&isExpanded?' ct-expanded':''}`);
+  item.innerHTML = `
+    <span class="ct-icon">${catIcon(getItemInfo(itemName).cat)}</span>
+    <span class="ct-name">${itemName}</span>
+    ${recipe ? `<span class="ct-qty" style="font-size:9px;color:var(--lav)">${recipe.station}</span>` : `<span class="ct-qty">${getItemInfo(itemName).how.split('(')[0].trim()}</span>`}
+    <div class="ct-check">${confirmed?'✓':''}</div>`;
+
+  item.addEventListener('click', () => {
+    if (hasChildren) {
+      S.planCraftOpen[expandKey] = !isExpanded;
+    }
+    if (!recipe) {
+      // leaf node: toggle confirm
+      if (!preset.craftConfirm) preset.craftConfirm = {};
+      preset.craftConfirm[itemName] = !confirmed;
+      savePresets();
+    }
+    renderPlanningContent();
+  });
+
+  wrapper.appendChild(item);
+
+  // render children if expanded
+  if (recipe && isExpanded) {
+    recipe.ing.forEach(ing => {
+      // parse quantity like "Rotan x2"
+      const match = ing.match(/^(.+?)\s*x(\d+)$/);
+      const ingName = match ? match[1] : ing;
+      const child   = renderCraftTree(ingName, preset, depth + 1);
+      wrapper.appendChild(child);
+    });
+    if (recipe.alt) {
+      const altNote = el('div','',
+        `<div style="font-size:9px;color:var(--muted);padding:4px 12px;font-style:italic">💡 Alt: ${recipe.alt}</div>`);
+      wrapper.appendChild(altNote);
+    }
+  }
+
+  return wrapper;
+}
+
+/* ── Unavailable item popup ── */
+let _popupTimer = null;
+function showUnavailPopup(name, day, e) {
+  // remove existing
+  document.querySelectorAll('.unavail-popup').forEach(p => p.remove());
+
+  const avDays = itemAvailDays(name);
+  const info   = getItemInfo(name);
+  const popup  = el('div','unavail-popup');
+  popup.innerHTML = `
+    <div class="up-name">⚠️ ${name}</div>
+    <div class="up-avail">
+      ${avDays.length === 7
+        ? '✅ Tersedia setiap hari'
+        : `📅 Tersedia: ${avDays.join(', ')}<br>❌ Tidak tersedia hari ${day}`}
+    </div>
+    <div class="up-how">📍 ${info.how}</div>`;
+
+  popup.style.left = Math.min(e.clientX + 10, window.innerWidth - 240) + 'px';
+  popup.style.top  = Math.min(e.clientY + 10, window.innerHeight - 120) + 'px';
+  document.body.appendChild(popup);
+
+  clearTimeout(_popupTimer);
+  _popupTimer = setTimeout(() => popup.remove(), 3000);
+  document.addEventListener('click', () => popup.remove(), { once:true });
+}
 
 /* ════════════════════════════════════════
    THEME SYSTEM

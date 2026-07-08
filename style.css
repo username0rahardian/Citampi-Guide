@@ -1657,3 +1657,365 @@ input,select{font-family:'Nunito',sans-serif;}
   background:rgba(233,30,140,.1);border:1px solid rgba(233,30,140,.2);
   cursor:pointer;
 }
+
+/* ════════════════════════════════════════
+   IKON KONSISTEN
+════════════════════════════════════════ */
+
+/* item category badge di list */
+.lb-cat{
+  position:absolute;bottom:4px;right:5px;
+  font-size:11px;line-height:1;
+  pointer-events:none;
+  opacity:.7;
+}
+
+/* icon pill — pengganti teks label di detail */
+.icon-pill{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 9px;border-radius:6px;
+  font-size:11px;font-weight:700;
+  background:var(--surface2);border:1px solid var(--bdr);
+  color:var(--txt2);
+}
+.icon-pill .ip-icon{font-size:13px;}
+
+/* skill row icons */
+.skill-icon-row{
+  display:flex;gap:8px;flex-wrap:wrap;
+}
+.skill-icon-pill{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 10px;border-radius:9px;
+  font-size:11px;font-weight:800;border:1.5px solid;
+  flex:1;min-width:80px;
+}
+.sip-k{background:rgba(2,132,199,.08);border-color:rgba(2,132,199,.25);color:var(--sky);}
+.sip-f{background:rgba(244,81,30,.08);border-color:rgba(244,81,30,.25);color:var(--coral);}
+.sip-c{background:var(--lav-soft);border-color:var(--bdr2);color:var(--lav);}
+.sip-icon{font-size:16px;}
+.sip-body{}
+.sip-name{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;opacity:.7;}
+.sip-val{font-size:13px;font-weight:900;line-height:1.1;}
+
+/* stat row — gaji & jam */
+.stat-row{
+  display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;
+}
+.stat-card{
+  flex:1;min-width:110px;
+  padding:10px 13px;border-radius:12px;
+  background:var(--surface2);border:1.5px solid var(--bdr);
+  display:flex;align-items:center;gap:10px;
+}
+.stat-icon{font-size:22px;flex-shrink:0;}
+.stat-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);}
+.stat-val{font-size:14px;font-weight:900;color:var(--txt);line-height:1.2;}
+.stat-card.salary .stat-val{color:var(--gold);}
+.stat-card.hours  .stat-val{color:var(--sky);}
+.stat-card.area   .stat-val{color:var(--mint);}
+
+/* info dasar row — icon variant */
+.info-row-icon{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:9px 12px;border-radius:10px;
+  background:var(--surface2);border:1px solid var(--bdr);
+  margin-bottom:6px;
+}
+.iri-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.iri-body{}
+.iri-lbl{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);}
+.iri-val{font-size:12px;font-weight:700;color:var(--txt);margin-top:1px;line-height:1.5;}
+
+/* item how-to icon */
+.how-row{
+  display:flex;align-items:flex-start;gap:9px;
+  padding:10px 13px;border-radius:11px;
+  background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);
+  border-left:3px solid var(--gold);margin-bottom:12px;
+}
+.how-icon{font-size:20px;flex-shrink:0;margin-top:1px;}
+.how-body{}
+.how-lbl{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--gold);margin-bottom:3px;}
+.how-val{font-size:12px;font-weight:700;color:var(--txt);line-height:1.55;}
+.how-tip{font-size:10px;color:var(--muted);margin-top:3px;font-style:italic;}
+
+/* ════════════════════════════════════════
+   PLANNING TAB
+════════════════════════════════════════ */
+
+/* ── Day selector ── */
+.plan-day-row{
+  display:flex;flex-wrap:wrap;gap:5px;
+  padding:14px 16px;
+  border-bottom:1px solid var(--bdr);
+  background:var(--surface2);
+}
+.plan-day-btn{
+  padding:6px 12px;border-radius:9px;
+  font-size:11px;font-weight:800;
+  border:1.5px solid var(--bdr);
+  background:var(--surface);color:var(--muted);
+  cursor:pointer;transition:all .15s;
+  position:relative;
+}
+.plan-day-btn:hover{color:var(--txt2);}
+.plan-day-btn.active{
+  background:var(--pink-soft);
+  border-color:rgba(233,30,140,.35);
+  color:var(--pink);
+}
+.plan-day-btn.has-preset::after{
+  content:'';
+  position:absolute;top:3px;right:3px;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--mint);
+}
+.plan-day-today{
+  font-size:9px;font-weight:900;
+  background:var(--mint);color:#fff;
+  padding:1px 5px;border-radius:4px;
+  position:absolute;top:-7px;left:50%;transform:translateX(-50%);
+  white-space:nowrap;
+}
+
+/* ── Preset editor ── */
+.plan-wrap{
+  padding:16px 20px 80px;
+  max-width:700px;
+}
+.plan-section-lbl{
+  font-size:10px;font-weight:900;text-transform:uppercase;
+  letter-spacing:1px;color:var(--dim);
+  display:flex;align-items:center;gap:6px;
+  margin-bottom:10px;
+}
+.plan-section-lbl::after{
+  content:'';flex:1;height:1px;background:var(--bdr);
+}
+
+/* char picker */
+.plan-char-row{
+  display:flex;flex-wrap:wrap;gap:7px;
+  margin-bottom:16px;
+}
+.plan-char-chip{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 12px;border-radius:11px;
+  background:var(--surface2);border:1.5px solid var(--bdr);
+  font-size:12px;font-weight:800;color:var(--txt2);
+  cursor:pointer;transition:all .15s;
+}
+.plan-char-chip:hover{border-color:var(--pink);}
+.plan-char-chip.selected{
+  background:var(--pink-soft);
+  border-color:rgba(233,30,140,.35);
+  color:var(--pink);
+}
+.plan-char-chip.selected .pcc-emoji{
+  filter:drop-shadow(0 0 4px rgba(233,30,140,.4));
+}
+.pcc-emoji{font-size:18px;}
+
+/* item grid for gifts */
+.plan-item-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:7px;margin-bottom:16px;
+}
+.plan-item-card{
+  padding:9px 11px;border-radius:11px;
+  background:var(--surface2);border:1.5px solid var(--bdr);
+  cursor:pointer;transition:all .15s;
+  position:relative;
+}
+.plan-item-card:hover{border-color:var(--pink);}
+.plan-item-card.checked{
+  background:var(--mint-soft);
+  border-color:rgba(0,137,123,.35);
+}
+.plan-item-card.unavail{
+  opacity:.45;
+  filter:grayscale(.6);
+}
+.plan-item-card.unavail:hover{
+  opacity:.55;border-color:var(--gold);
+}
+.pic-check{
+  position:absolute;top:7px;right:7px;
+  width:16px;height:16px;border-radius:50%;
+  border:1.5px solid var(--bdr);
+  background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;
+  transition:all .15s;
+}
+.plan-item-card.checked .pic-check{
+  background:var(--mint);border-color:var(--mint);color:#fff;
+}
+.pic-icon{font-size:14px;margin-bottom:3px;}
+.pic-name{font-size:10px;font-weight:800;color:var(--txt);line-height:1.3;}
+.pic-tier{
+  font-size:9px;font-weight:800;
+  margin-top:3px;
+}
+.pic-unavail-tag{
+  font-size:8px;font-weight:800;color:var(--gold);
+  margin-top:2px;
+}
+
+/* unavail tooltip */
+.unavail-popup{
+  position:fixed;z-index:300;
+  background:var(--surface);border:1.5px solid var(--bdr);
+  border-radius:12px;padding:12px 14px;
+  max-width:220px;
+  box-shadow:0 8px 24px rgba(0,0,0,.15);
+  font-size:11px;color:var(--txt);
+  pointer-events:none;
+}
+.up-name{font-weight:900;margin-bottom:5px;}
+.up-avail{color:var(--muted);line-height:1.5;}
+.up-how{color:var(--txt2);margin-top:4px;line-height:1.5;font-style:italic;}
+
+/* crafting tree */
+.craft-tree{margin-bottom:16px;}
+.ct-picker{
+  display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;
+}
+.ct-pick{
+  padding:6px 12px;border-radius:9px;
+  font-size:11px;font-weight:800;
+  border:1.5px solid var(--bdr);
+  background:var(--surface2);color:var(--muted);
+  cursor:pointer;transition:all .15s;
+}
+.ct-pick:hover{color:var(--txt2);}
+.ct-pick.active{
+  background:var(--lav-soft);border-color:var(--bdr2);color:var(--lav);
+}
+.ct-node{
+  padding-left:0;
+}
+.ct-item{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 12px;border-radius:10px;
+  background:var(--surface2);border:1.5px solid var(--bdr);
+  margin-bottom:5px;cursor:pointer;
+  transition:all .15s;
+  position:relative;
+}
+.ct-item.ct-root{
+  background:linear-gradient(135deg,var(--lav-soft),var(--surface2));
+  border-color:var(--bdr2);
+}
+.ct-item.ct-confirmed{
+  background:var(--mint-soft);border-color:rgba(0,137,123,.3);
+}
+.ct-item.ct-has-children::before{
+  content:'▶';font-size:9px;color:var(--lav);
+  position:absolute;left:-14px;top:50%;transform:translateY(-50%);
+  transition:transform .2s;
+}
+.ct-item.ct-expanded::before{
+  transform:translateY(-50%) rotate(90deg);
+}
+.ct-icon{font-size:16px;flex-shrink:0;}
+.ct-name{font-size:11px;font-weight:800;color:var(--txt);flex:1;}
+.ct-qty{font-size:10px;color:var(--muted);flex-shrink:0;}
+.ct-check{
+  width:18px;height:18px;border-radius:50%;
+  border:1.5px solid var(--bdr);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;flex-shrink:0;
+  background:var(--surface);
+}
+.ct-item.ct-confirmed .ct-check{
+  background:var(--mint);border-color:var(--mint);color:#fff;
+}
+.ct-children{
+  padding-left:22px;
+  border-left:2px dashed var(--bdr);
+  margin-left:16px;
+  margin-top:3px;
+  margin-bottom:6px;
+}
+
+/* summary bar */
+.plan-summary{
+  position:sticky;bottom:0;
+  background:var(--surface);
+  border-top:1.5px solid var(--bdr);
+  padding:10px 16px;
+  display:flex;align-items:center;gap:10px;
+  flex-shrink:0;
+}
+.ps-stat{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:800;
+  padding:5px 10px;border-radius:8px;
+  background:var(--surface2);border:1px solid var(--bdr);
+}
+.ps-save{
+  margin-left:auto;
+  padding:8px 18px;border-radius:10px;
+  background:var(--pink);color:#fff;
+  font-size:12px;font-weight:900;
+  cursor:pointer;transition:all .15s;
+  border:none;
+}
+.ps-save:hover{opacity:.88;transform:scale(.98);}
+.ps-saved{color:var(--mint);font-size:11px;font-weight:800;}
+
+/* ── Mini Bag Widget in Nav ── */
+.mnav-bag{
+  display:flex;flex-direction:column;align-items:center;
+  gap:3px;padding:8px 6px;border-radius:12px;
+  color:var(--muted);transition:all .15s;
+  position:relative;cursor:pointer;width:100%;
+  background:transparent;border:none;
+}
+.mnav-bag:hover{background:var(--surface2);color:var(--txt2);}
+.mnav-bag.active{background:rgba(56,189,248,.1);color:var(--sky);}
+.mnav-bag.has-items{
+  background:rgba(0,137,123,.08);
+  border:1px solid rgba(0,137,123,.2);
+}
+.bag-icon-wrap{position:relative;font-size:20px;}
+.bag-count{
+  position:absolute;top:-4px;right:-6px;
+  background:var(--mint);color:#fff;
+  font-size:8px;font-weight:900;
+  min-width:14px;height:14px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 3px;
+}
+.bag-lbl{font-size:9px;font-weight:800;text-align:center;line-height:1.2;}
+.bag-preview{
+  display:flex;gap:1px;flex-wrap:wrap;justify-content:center;
+  max-width:52px;
+}
+.bag-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--mint);
+}
+
+/* ── Plan preset empty state ── */
+.plan-empty{
+  text-align:center;padding:40px 20px;color:var(--muted);
+}
+.plan-empty-icon{font-size:36px;margin-bottom:10px;}
+.plan-empty-title{font-size:14px;font-weight:800;color:var(--txt2);margin-bottom:5px;}
+.plan-empty-sub{font-size:11px;color:var(--dim);line-height:1.6;}
+
+@media(max-width:768px){
+  .plan-item-grid{grid-template-columns:1fr 1fr;}
+  .plan-day-row{padding:10px 12px;}
+}
+
+/* Planning: info panel full width, list panel hidden */
+body.planning-mode #list-panel{
+  display:none;
+}
+body.planning-mode #info-panel{
+  flex:1;
+}

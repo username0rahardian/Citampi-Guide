@@ -60,6 +60,20 @@
       <span class="mnav-icon">💼</span>
       <span class="mnav-lbl">Job Info</span>
     </button>
+    <button class="mnav" data-f="planning">
+      <span class="mnav-icon">📅</span>
+      <span class="mnav-lbl">Planning</span>
+    </button>
+    <div class="mnav-sep"></div>
+    <!-- Bag widget -->
+    <button class="mnav-bag" id="nav-bag-btn" onclick="switchFeatureFromBag()" title="Bawaan Hari Ini">
+      <div class="bag-icon-wrap">
+        🎒
+        <span class="bag-count" id="bag-count" style="display:none">0</span>
+      </div>
+      <div class="bag-lbl" id="bag-lbl">Bawaan</div>
+      <div class="bag-preview" id="bag-preview"></div>
+    </button>
     <div class="mnav-sep"></div>
     <button class="mnav mnav-pin" data-f="prioritas">
       <span class="mnav-icon">📌</span>
@@ -137,9 +151,9 @@
     <span class="btab-icon">🎁</span>
     <span class="btab-lbl">Item</span>
   </div>
-  <div class="btab" data-f="job" onclick="switchFeatureMob('job',this)">
-    <span class="btab-icon">💼</span>
-    <span class="btab-lbl">Job</span>
+  <div class="btab" data-f="planning" onclick="switchFeatureMob('planning',this)">
+    <span class="btab-icon">📅</span>
+    <span class="btab-lbl">Planning</span>
   </div>
   <div class="btab" data-f="prioritas" onclick="switchFeatureMob('prioritas',this)">
     <span class="btab-icon">📌</span>
