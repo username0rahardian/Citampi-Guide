@@ -134,12 +134,18 @@ function initMainNav() {
 
 function renderAll() {
   document.body.classList.toggle('planning-mode', S.feature === 'planning');
+
+  // Bawaan nav: only visible when planning is active
+  const bagBtn = $('nav-bag-btn');
+  const bagSep = $('nav-bag-sep');
+  if (bagBtn) bagBtn.style.display = S.feature === 'planning' ? 'flex' : 'none';
+  if (bagSep) bagSep.style.display = S.feature === 'planning' ? 'block' : 'none';
+
   renderSubNav();
   renderFilters();
   renderQuickFilters();
   renderList();
   renderInfo();
-  renderHeaderPrio();
   updatePinBadge();
   updateMobileView();
   renderBagWidget();
@@ -1366,6 +1372,10 @@ function doSwap(oldName) {
   S.prios.push(_pendingPromo);
   closeSwap();
   persist(); renderAll();
+  // refresh opt panel if open on prioritas section
+  if ($('opt-panel').classList.contains('open') && optSection === 'prioritas') {
+    renderOptContent();
+  }
 }
 function closeSwap() { $('swap-modal').style.display = 'none'; }
 $('swap-modal').addEventListener('click', e => { if (e.target === $('swap-modal')) closeSwap(); });
@@ -1374,45 +1384,7 @@ $('swap-modal').addEventListener('click', e => { if (e.target === $('swap-modal'
    HEADER PRIORITY WIDGET
 ════════════════════════════════════════ */
 function renderHeaderPrio() {
-  const zone = $('h-prio-zone');
-  if (!S.pins.length) {
-    zone.innerHTML = `<div class="prio-empty-hint">📍 Pin karakter dari tab Karakter untuk mulai</div>`;
-    return;
-  }
-  // 3 prio cards
-  let html = `<div class="h-prio-cards">`;
-  for (let i = 0; i < MAX_PRIO; i++) {
-    const name = S.prios[i];
-    const c = name ? chars.find(ch => ch.name === name) : null;
-    if (c) {
-      html += `<div class="h-prio-card slot-filled">
-        <div class="h-slot-num">#${i+1}</div>
-        <span class="h-prio-emoji">${c.emoji}</span>
-        <div class="h-prio-info"><div class="h-prio-name">${c.name}</div><div class="h-prio-role">${c.role}</div></div>
-        <button class="h-prio-rm" onclick="removePrio('${c.name.replace(/'/g,"\\'")}')">✕</button>
-      </div>`;
-    } else {
-      html += `<div class="h-prio-card slot-empty"><div class="h-slot-num">#${i+1}</div><span style="font-size:11px;color:var(--dim)">Kosong</span></div>`;
-    }
-  }
-  html += `</div>`;
-
-  // pin chips
-  html += `<div class="h-pin-chips">`;
-  S.pins.forEach(name => {
-    const c = chars.find(ch => ch.name === name);
-    if (!c) return;
-    const isPrio = S.prios.includes(name);
-    html += `<span class="h-pin-chip${isPrio?' is-prio':''}">
-      ${c.emoji} ${name}
-      <button class="h-chip-up" onclick="promoteToPrio('${name.replace(/'/g,"\\'")}')">
-        ${isPrio ? '★' : '↑'}
-      </button>
-      <button class="h-chip-x" onclick="removePin('${name.replace(/'/g,"\\'")}')">✕</button>
-    </span>`;
-  });
-  html += `</div>`;
-  zone.innerHTML = html;
+  // Moved to Option panel → openOptSection('prioritas')
 }
 
 function updatePinBadge() {
@@ -1962,6 +1934,275 @@ function showUnavailPopup(name, day, e) {
   clearTimeout(_popupTimer);
   _popupTimer = setTimeout(() => popup.remove(), 3000);
   document.addEventListener('click', () => popup.remove(), { once:true });
+}
+
+/* ════════════════════════════════════════
+   OPTION PANEL SYSTEM
+════════════════════════════════════════ */
+let optSection = null; // null | 'prioritas' | 'tampilan' | 'preset'
+let optPresetDay = getRealDay();
+
+function toggleOptPanel() {
+  const panel   = $('opt-panel');
+  const overlay = $('opt-overlay');
+  const isOpen  = panel.classList.contains('open');
+  if (isOpen) {
+    closeOptPanel();
+  } else {
+    optSection = null;
+    panel.classList.add('open');
+    overlay.classList.add('open');
+    renderOptNav();
+    $('opt-content').innerHTML = '';
+    $('opt-back-row').style.display = 'none';
+  }
+}
+
+function closeOptPanel() {
+  $('opt-panel').classList.remove('open');
+  $('opt-overlay').classList.remove('open');
+  optSection = null;
+}
+
+function openOptSection(sec) {
+  optSection = sec;
+  $('opt-nav-btns').style.display = 'none';
+  $('opt-back-row').style.display = 'block';
+  renderOptContent();
+}
+
+function closeOptSection() {
+  optSection = null;
+  $('opt-nav-btns').style.display = 'flex';
+  $('opt-back-row').style.display = 'none';
+  $('opt-content').innerHTML = '';
+}
+
+function renderOptNav() {
+  $('opt-nav-btns').style.display = 'flex';
+  $('opt-back-row').style.display = 'none';
+  $('opt-content').innerHTML = '';
+}
+
+function renderOptContent() {
+  const ic = $('opt-content');
+  ic.innerHTML = '';
+  if (optSection === 'prioritas') renderOptPrioritas(ic);
+  if (optSection === 'tampilan')  renderOptTampilan(ic);
+  if (optSection === 'preset')    renderOptPreset(ic);
+}
+
+/* ── Prioritas section ── */
+function renderOptPrioritas(ic) {
+  // 3 prio slots
+  const lbl1 = el('div','opt-section-title','🎯 Prioritas Utama');
+  ic.appendChild(lbl1);
+
+  const cards = el('div','opt-prio-cards');
+  for (let i = 0; i < MAX_PRIO; i++) {
+    const name = S.prios[i];
+    const c    = name ? chars.find(ch => ch.name === name) : null;
+    const card = el('div', `opt-prio-card ${c?'filled':'empty'}`);
+    if (c) {
+      const top3 = (c.gifts[8]||[]).slice(0,3);
+      card.innerHTML = `
+        <div class="opt-slot-num">#${i+1}</div>
+        <span class="opt-prio-emoji">${c.emoji}</span>
+        <div class="opt-prio-info">
+          <div class="opt-prio-name">${c.name}</div>
+          <div class="opt-prio-role">${c.role}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">
+            ${top3.map(g=>`<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--t8-bg);border:1px solid var(--t8-b);color:#92400e">${g}</span>`).join('')}
+            ${(c.gifts[8]||[]).length>3?`<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--t8-bg);color:#92400e">+${(c.gifts[8]||[]).length-3}</span>`:''}
+          </div>
+        </div>
+        <button class="opt-prio-rm" onclick="removePrioOpt('${c.name.replace(/'/g,"\\'")}')">✕</button>`;
+    } else {
+      card.innerHTML = `
+        <div class="opt-slot-num">#${i+1}</div>
+        <span class="opt-empty-slot">Slot kosong — naikkan dari daftar pin</span>`;
+    }
+    cards.appendChild(card);
+  }
+  ic.appendChild(cards);
+
+  // Pin chips
+  if (S.pins.length) {
+    const lbl2 = el('div','opt-section-title',`📌 Semua Pin (${S.pins.length}/${MAX_PIN})`);
+    ic.appendChild(lbl2);
+    const chips = el('div','opt-pin-chips');
+    S.pins.forEach(name => {
+      const c      = chars.find(ch => ch.name === name);
+      const isPrio = S.prios.includes(name);
+      const chip   = el('div',`opt-pin-chip${isPrio?' is-prio':''}`);
+      chip.innerHTML = `
+        <span>${c?.emoji||'👤'}</span>
+        <span>${name}</span>
+        <button class="opc-up" onclick="promoteToPrioOpt('${name.replace(/'/g,"\\'")}')">
+          ${isPrio?'★ Prio':'↑ Jadikan'}
+        </button>
+        <span class="opc-x" onclick="removePinOpt('${name.replace(/'/g,"\\'")}')">✕</span>`;
+      chips.appendChild(chip);
+    });
+    ic.appendChild(chips);
+  } else {
+    ic.appendChild(el('div','opt-preset-empty','Belum ada karakter di-pin.\nPin dari tab Karakter.'));
+  }
+
+  // clear all
+  if (S.pins.length) {
+    const clr = el('button','opt-preset-clear','🗑️ Hapus Semua Pin');
+    clr.addEventListener('click', () => {
+      if (!confirm('Hapus semua pin dan prioritas?')) return;
+      S.pins=[]; S.prios=[];
+      persist(); renderAll(); renderOptContent();
+    });
+    ic.appendChild(clr);
+  }
+}
+
+function removePrioOpt(name) {
+  S.prios = S.prios.filter(n => n !== name);
+  persist(); renderAll(); renderOptContent();
+}
+function removePinOpt(name) {
+  S.pins  = S.pins.filter(n => n !== name);
+  S.prios = S.prios.filter(n => n !== name);
+  persist(); renderAll(); renderOptContent();
+}
+function promoteToPrioOpt(name) {
+  if (S.prios.includes(name)) {
+    S.prios = S.prios.filter(n => n !== name);
+    persist(); renderAll(); renderOptContent(); return;
+  }
+  if (S.prios.length < MAX_PRIO) {
+    S.prios.push(name);
+    persist(); renderAll(); renderOptContent();
+  } else {
+    // open swap modal, then refresh opt panel after
+    openSwap(name);
+  }
+}
+
+/* ── Tampilan section ── */
+function renderOptTampilan(ic) {
+  const wrap = el('div','opt-tampilan');
+
+  // SIZE
+  const szLbl = el('div','tp-group-lbl','📐 Ukuran Widget');
+  wrap.appendChild(szLbl);
+  const szRow = el('div','tp-size-row');
+  sizes.forEach(s => {
+    const card = el('div', `sz-card${s.id===currentSize?' active':''}`, `
+      <div class="sz-dots">${s.dots.map(d=>`<div class="sz-dot" style="width:${d.w}px;height:${d.h}px"></div>`).join('')}</div>
+      <div class="sz-label">${s.label}</div>
+      <div class="sz-sub">${s.sub}</div>`);
+    card.dataset.size = s.id;
+    card.addEventListener('click', () => { applySize(s.id); renderOptContent(); });
+    szRow.appendChild(card);
+  });
+  wrap.appendChild(szRow);
+
+  // THEME LIGHT
+  const thLbl1 = el('div','tp-group-lbl','☀️ Tema Terang');
+  wrap.appendChild(thLbl1);
+  const gridLight = el('div','tp-grid');
+  themes.filter(t => !t.dark).forEach(t => {
+    const card = el('div',`tp-card${t.id===currentTheme?' active':''}`,`
+      <div class="tp-swatches">${t.swatches.map(s=>`<div class="tp-sw" style="background:${s}"></div>`).join('')}</div>
+      <div class="tp-name">${t.name}</div>
+      <div class="tp-sub">${t.sub}</div>`);
+    card.dataset.theme = t.id;
+    card.addEventListener('click', () => { applyTheme(t.id); renderOptContent(); });
+    gridLight.appendChild(card);
+  });
+  wrap.appendChild(gridLight);
+
+  // THEME DARK
+  const thLbl2 = el('div','tp-group-lbl','🌙 Tema Gelap');
+  wrap.appendChild(thLbl2);
+  const gridDark = el('div','tp-grid');
+  themes.filter(t => t.dark).forEach(t => {
+    const card = el('div',`tp-card${t.id===currentTheme?' active':''}`,`
+      <div class="tp-swatches">${t.swatches.map(s=>`<div class="tp-sw" style="background:${s}"></div>`).join('')}</div>
+      <div class="tp-name">${t.name}</div>
+      <div class="tp-sub">${t.sub}</div>`);
+    card.dataset.theme = t.id;
+    card.addEventListener('click', () => { applyTheme(t.id); renderOptContent(); });
+    gridDark.appendChild(card);
+  });
+  wrap.appendChild(gridDark);
+  ic.appendChild(wrap);
+}
+
+/* ── Preset section ── */
+function renderOptPreset(ic) {
+  // day selector
+  const dayLbl = el('div','opt-section-title','📅 Pilih Hari');
+  ic.appendChild(dayLbl);
+
+  const dayRow = el('div','opt-preset-day-row');
+  days.forEach(d => {
+    const preset   = getPreset(d);
+    const hasItems = Object.values(preset.items).some(v=>v) || preset.craft;
+    const isToday  = d === getRealDay();
+    const btn = el('button',
+      `opt-preset-day${optPresetDay===d?' active':''}${hasItems?' has-preset':''}`,
+      d + (isToday?' ⬅':''));
+    btn.addEventListener('click', () => { optPresetDay = d; renderOptContent(); });
+    dayRow.appendChild(btn);
+  });
+  ic.appendChild(dayRow);
+
+  const preset = getPreset(optPresetDay);
+  const checked = Object.entries(preset.items).filter(([,v])=>v).map(([k])=>k);
+
+  if (!checked.length && !preset.craft) {
+    ic.appendChild(el('div','opt-preset-empty',
+      `Belum ada preset untuk hari ${optPresetDay}.\nAtur di tab Planning.`));
+    return;
+  }
+
+  // items list
+  if (checked.length) {
+    const lbl = el('div','opt-section-title',`🎒 Bawaan (${checked.length} item)`);
+    ic.appendChild(lbl);
+    const list = el('div','opt-preset-items');
+    checked.forEach(name => {
+      const info  = getItemInfo(name);
+      const avail = isItemAvailOn(name, optPresetDay);
+      const row   = el('div','opt-preset-item');
+      row.innerHTML = `
+        <span class="opi-icon">${catIcon(info.cat)}</span>
+        <span class="opi-name">${name}</span>
+        <span class="opi-avail ${avail?'opi-ok':'opi-no'}">${avail?'✓ Tersedia':'⚠ Cek hari'}</span>
+        <span class="opi-rm" onclick="removePresetItem('${name.replace(/'/g,"\\'")}')">✕</span>`;
+      list.appendChild(row);
+    });
+    ic.appendChild(list);
+  }
+
+  // craft target
+  if (preset.craft) {
+    ic.appendChild(el('div','opt-preset-craft',`🔨 Target Craft: ${preset.craft}`));
+  }
+
+  // clear
+  const clr = el('button','opt-preset-clear',`🗑️ Kosongkan Preset ${optPresetDay}`);
+  clr.addEventListener('click', () => {
+    if (!confirm(`Kosongkan preset ${optPresetDay}?`)) return;
+    presets[optPresetDay] = { items:{}, craft:null, craftConfirm:{} };
+    savePresets(); renderBagWidget(); renderOptContent();
+    if (S.feature === 'planning') renderInfo();
+  });
+  ic.appendChild(clr);
+}
+
+function removePresetItem(name) {
+  const preset = getPreset(optPresetDay);
+  preset.items[name] = false;
+  savePresets(); renderBagWidget(); renderOptContent();
+  if (S.feature === 'planning') renderInfo();
 }
 
 /* ════════════════════════════════════════
